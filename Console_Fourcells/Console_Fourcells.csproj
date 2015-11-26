@@ -41,9 +41,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Block.cs" />
+    <Compile Include="Block\Block.cs" />
+    <Compile Include="Board.cs" />
+    <Compile Include="Block\IBlockV.cs" />
+    <Compile Include="Block\LBlockU.cs" />
+    <Compile Include="Block\OBlock.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Block\SBlockH.cs" />
+    <Compile Include="Block\TBlockU.cs" />
+    <Compile Include="Block\TurnLBlockU.cs" />
+    <Compile Include="Block\TurnSBlockH.cs" />
+    <Compile Include="Setter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

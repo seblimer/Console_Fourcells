@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Console_Fourcells {
 	abstract class Block {
-	}
+		protected int num;
 
-	class Block_No1 : Block { 
+		public int Num {
+			get{return num;}
+		}
+
+		public abstract int[] region(int row, int col);
 	}
 }
