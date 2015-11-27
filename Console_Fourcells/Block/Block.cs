@@ -13,5 +13,7 @@ namespace Console_Fourcells {
 		}
 
 		public abstract int[] region(int row, int col);
+
+		//public abstract int[] charRegion(int row, int col);
 	}
 }
