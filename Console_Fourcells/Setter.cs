@@ -7,42 +7,43 @@ using System.Threading.Tasks;
 namespace Console_Fourcells {
 	class Setter {
 		private Block[] blocks;
+		private Block[] tBlocks= new Block[4];
 
 		public Setter(){
 			blocks = setBlockAll();
-		}
-
-		public Block numBlock(int num) {
-			return blocks[num];
-		}
-
-		public int blocksLength() {
-			return blocks.Length;
+			Array.Copy(blocks, 13, tBlocks, 0, 4);
 		}
 
 		public Block[] setBlockAll() {
 			Block[] blocks =
 			{	new LBlockU(),
-				new TurnLBlockU(),
-				new SBlockH(),
-				new TurnSBlockH(),
-				new OBlock(),
-				new TBlockU(),
-				new IBlockV(),
 				new LBlockR(),
 				new LBlockD(),
 				new LBlockL(),
+				new TurnLBlockU(),
 				new TurnLBlockR(),
 				new TurnLBlockD(),
 				new TurnLBlockL(),
+				new SBlockH(),
 				new SBlockV(),
+				new TurnSBlockH(),
 				new TurnSBlockV(),
+				new OBlock(),
+				new TBlockU(),
 				new TBlockR(),
 				new TBlockD(),
 				new TBlockL(),
+				new IBlockV(),
 				new IBlockH()
 			};
 			return blocks;
+		}
+
+		public Block[] AllBlocks() {
+			return blocks;
+		}
+		public Block[] TBlocks() {
+			return tBlocks;
 		}
 	}
 }

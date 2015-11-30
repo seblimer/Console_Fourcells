@@ -9,10 +9,13 @@ namespace Console_Fourcells {
 		public OBlock() {
 			num = 5;
 		}
-		public override int[] region(int row, int col) {
-			int basePoint = 10 * row + col;
+		public override int[] region(int basePoint) {
 			int[] point = { basePoint, basePoint + 1, basePoint + 10, basePoint + 11 };
 			return point;
+		}
+
+		public override int[] charRegion(int basePoint) {
+			return new int[0];
 		}
 	}
 }
