@@ -45,5 +45,12 @@ namespace Console_Fourcells {
 		public Block[] TBlocks() {
 			return tBlocks;
 		}
+		public int[] Saltire(int basePoint) {
+			return new int[] { basePoint, basePoint - 11, basePoint - 9, basePoint + 9, basePoint + 11 };
+		}
+
+		public int[] Cross(int basePoint) {
+			return new int[] { basePoint, basePoint - 10, basePoint - 1, basePoint + 1, basePoint + 10 };
+		}
 	}
 }

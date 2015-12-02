@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Console_Fourcells {
 	class Program {
+		private static int seqNum = 1;
 		static void Main(string[] args) {
 			Setter set = new Setter();
 			Block[] blocks;
@@ -15,73 +16,44 @@ namespace Console_Fourcells {
 				System.Console.ReadLine();
 				return;
 			}
-			string[,] iniBoard ={{"-","1","-","-","-","3"},
-								 {"-","-","-","-","1","3"},
-								 {"1","-","-","-","-","-"},
+			string[,] iniBoard ={{"-","-","1","-","2","-"},
+								 {"-","2","-","3","-","-"},
+								 {"-","-","-","3","-","-"},
 								 {"-","-","1","-","-","-"},
-								 {"-","-","-","-","-","-"},
-								 {"-","-","-","-","-","2"}};
-			Board fillBoard = new Board(size + 2);
+								 {"-","-","-","2","-","-"},
+								 {"2","-","3","-","-","2"}};
+			Board fillBoard = new Board(size);
 
 			List<int> oneList = new List<int>();
 			List<int> blackList = new List<int>();
 			List<Block> checkList = new List<Block>();
+			int[] croReg = new int[5];
+			int[] salReg = new int[5];
 			int maxSeqNum = size * size / 4;
-			int seqNum = 1;
+
+			///****************************************
+			// * 左上のマスを基点に確実に
+			// * 別ブロックになるマスを埋める
+			// * **************************************/
+			//for(int i = 0; i < size; i = i + 4) {
+			//	for(int j = 0; j < size; j = j + 4) {
+			//		fillBoard.fill(seqNum++, i * 10 + j);
+			//	}
+			//}
 
 			/****************************************
-			 * 同一ブロックに複数存在しない"1","3"が並ぶ場合、
-			 * 別のブロック番号で置く
+			 * 同一ブロックに複数存在しない"1"に
+			 * それぞれの番号を付与
 			 ****************************************/
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
 					if(iniBoard[i, j] == "1") {
 						oneList.Add(i * 10 + j);
-
-						try {
-							if(iniBoard[i, j + 1] == "1"
-								&& fillBoard.check(i * 10 + j + 1)) {
-								fillBoard.fill(seqNum++, i * 10 + j + 1);
-							}
-						}
-						catch { /*無視*/ }
-
-						try {
-							if(iniBoard[i + 1, j] == "1"
-								&& fillBoard.check((i + 1) * 10 + j)) {
-								fillBoard.fill(seqNum++, (i + 1) * 10 + j);
-							}
-						}
-						catch { /*無視*/ }
-
 						if(fillBoard.check(i * 10 + j)) {
 							fillBoard.fill(seqNum++, i * 10 + j);
 						}
+						iniBoard[i, j] = "-";
 					}
-					//else if(iniBoard[i, j] == "3") {
-					//	try {
-					//		if(iniBoard[i, j + 1] == "3") {
-					//			if(fillBoard.check(i * 10 + j)) {
-					//				fillBoard.fill(seqNum++, i * 10 + j);
-					//			}
-					//			if(fillBoard.check(i * 10 + j + 1)) {
-					//				fillBoard.fill(seqNum++, i * 10 + (j + 1));
-					//			}
-					//		}
-					//	}
-					//	catch { /*無視*/ }
-					//	try {
-					//		if(iniBoard[i + 1, j] == "3") {
-					//			if(fillBoard.check(i * 10 + j)) {
-					//				fillBoard.fill(seqNum++, i * 10 + j);
-					//			}
-					//			if(fillBoard.check((i + 1) * 10 + j)) {
-					//				fillBoard.fill(seqNum++, (i + 1) * 10 + j);
-					//			}
-					//		}
-					//	}
-					//	catch { /*無視*/ }
-					//}
 				}
 			}
 
@@ -91,45 +63,80 @@ namespace Console_Fourcells {
 			//while(!fillBoard.compOr()) {
 
 			//"1"のマスについてチェック
-			blocks = set.TBlocks();
-			foreach(int li in oneList) {	
-				foreach(Block bl in blocks) {
-					if(fillBoard.check(bl.charRegion(li))) {
-						checkList.Add(bl);
+			if(oneList.Count() != 0) {
+				blocks = set.TBlocks();
+				foreach(int li in oneList) {
+					foreach(Block bl in blocks) {
+						if(fillBoard.check(bl.charRegion(li))) {
+							checkList.Add(bl);
+						}
+					}
+					if(checkList.Count == 1) {
+						if(fillBoard.getNum() == 0) {
+							fillBoard.fill(seqNum++, checkList[0].charRegion(li));
+						}
+						else {
+							fillBoard.fill(fillBoard.getNum(), checkList[0].charRegion(li));
+						}
+						blackList.Add(li);
+					}
+					checkList.Clear();
+				}
+				try {
+					foreach(int bl in blackList) {
+						oneList.Remove(bl);
 					}
 				}
-				if(checkList.Count == 1) {
-					if(fillBoard.NextNum() == 0) {
-						fillBoard.fill(seqNum++, checkList[0].charRegion(li));
-					}
-					else {
-						fillBoard.fill(fillBoard.NextNum(), checkList[0].charRegion(li));
-					}
-					blackList.Add(li);
-				}
-				checkList.Clear();
-			}
-			try {
-				foreach(int bl in blackList) {
-					oneList.Remove(bl);
+				catch { }
+				finally {
+					blackList.Clear();
 				}
 			}
-			catch { }
-			finally {
-				blackList.Clear();
+
+			/****************************************
+			 * 各数字のマスの上下左右をチェック
+			 * 4-数字分周りが確定したブロックならばそれ以外のマスと繋がる
+			 * **************************************/
+			for(int i = 0; i < size; i++) {
+				for(int j = 0; j < size; j++) {
+					if(iniBoard[i, j] == "2" || iniBoard[i, j] == "3") {
+						if(!fillBoard.check(i * 10 + j)) {
+							if(fillBoard.blockWeight(fillBoard.getNum()) >= 4) {
+								iniBoard[i, j] = "-";
+							}
+						}
+						else {
+							croReg = set.Cross(i * 10 + j);
+							if(fillBoard.extend(int.Parse(iniBoard[i, j]), croReg)) {
+								iniBoard[i, j] = "-";
+							}
+						}
+
+					}
+				}
 			}
-			//ここまで
-			//}
+
+
 
 			fillBoard.debugWrite();
+			for(int i = 0; i < size; i++) {
+				for(int j = 0; j < size; j++) {
+					System.Console.Write("{0, 3}", iniBoard[i, j]);
+				}
+				System.Console.WriteLine();
+			}
 			//fillBoard.debugArrayWrite();
 			//System.Console.WriteLine("oneList : {0}", oneList.Count);
-			foreach(int li in oneList){
+			foreach(int li in oneList) {
 				System.Console.WriteLine(li);
 			}
 			System.Console.WriteLine();
 			System.Console.Write("Enterで終了 + seqNum = {0}", seqNum);
 			System.Console.ReadLine();
+		}
+
+		public static int SeqNum {
+			get { return seqNum++; }
 		}
 	}
 }
