@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Console_Fourcells {
 	class Program {
-		private static int seqNum = 1;
 		static void Main(string[] args) {
 			Setter set = new Setter();
 			Block[] blocks;
@@ -27,19 +26,8 @@ namespace Console_Fourcells {
 			List<int> oneList = new List<int>();
 			List<int> blackList = new List<int>();
 			List<Block> checkList = new List<Block>();
-			int[] croReg = new int[5];
 			int[] salReg = new int[5];
 			int maxSeqNum = size * size / 4;
-
-			///****************************************
-			// * 左上のマスを基点に確実に
-			// * 別ブロックになるマスを埋める
-			// * **************************************/
-			//for(int i = 0; i < size; i = i + 4) {
-			//	for(int j = 0; j < size; j = j + 4) {
-			//		fillBoard.fill(seqNum++, i * 10 + j);
-			//	}
-			//}
 
 			/****************************************
 			 * 同一ブロックに複数存在しない"1"に
@@ -50,7 +38,7 @@ namespace Console_Fourcells {
 					if(iniBoard[i, j] == "1") {
 						oneList.Add(i * 10 + j);
 						if(fillBoard.check(i * 10 + j)) {
-							fillBoard.fill(seqNum++, i * 10 + j);
+							fillBoard.fill(fillBoard.seqNum(), i * 10 + j);
 						}
 						iniBoard[i, j] = "-";
 					}
@@ -73,7 +61,7 @@ namespace Console_Fourcells {
 					}
 					if(checkList.Count == 1) {
 						if(fillBoard.getNum() == 0) {
-							fillBoard.fill(seqNum++, checkList[0].charRegion(li));
+							fillBoard.fill(fillBoard.seqNum(), checkList[0].charRegion(li));
 						}
 						else {
 							fillBoard.fill(fillBoard.getNum(), checkList[0].charRegion(li));
@@ -100,23 +88,14 @@ namespace Console_Fourcells {
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
 					if(iniBoard[i, j] == "2" || iniBoard[i, j] == "3") {
-						if(!fillBoard.check(i * 10 + j)) {
-							if(fillBoard.blockWeight(fillBoard.getNum()) >= 4) {
-								iniBoard[i, j] = "-";
-							}
+						if(fillBoard.extend(int.Parse(iniBoard[i, j]), i * 10 + j)) {
+							iniBoard[i, j] = "-";
 						}
-						else {
-							croReg = set.Cross(i * 10 + j);
-							if(fillBoard.extend(int.Parse(iniBoard[i, j]), croReg)) {
-								iniBoard[i, j] = "-";
-							}
-						}
-
 					}
 				}
 			}
 
-
+			fillBoard.accrual();
 
 			fillBoard.debugWrite();
 			for(int i = 0; i < size; i++) {
@@ -131,12 +110,8 @@ namespace Console_Fourcells {
 				System.Console.WriteLine(li);
 			}
 			System.Console.WriteLine();
-			System.Console.Write("Enterで終了 + seqNum = {0}", seqNum);
+			System.Console.Write("Enterで終了 + seqNum = {0}", fillBoard.seqNum());
 			System.Console.ReadLine();
-		}
-
-		public static int SeqNum {
-			get { return seqNum++; }
 		}
 	}
 }
