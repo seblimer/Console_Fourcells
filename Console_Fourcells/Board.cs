@@ -109,6 +109,7 @@ namespace Console_Fourcells {
 		}
 
 		public bool extend(int num, int basePoint) {
+			bool change = false;
 			List<int> poss = new List<int>();
 			int sameNum = new int();
 			int[] point = cross(basePoint);
@@ -132,14 +133,14 @@ namespace Console_Fourcells {
 				}
 			}
 			if(sameNum == num) {
-				return true;
+				change = true;
 			}
-			if(poss.Count == num - sameNum) {
+			else if(poss.Count == num - sameNum) {
 				poss.Add(basePoint);
 				paint(poss.ToArray());
-				return true;
+				change = true;
 			}
-			return false;
+			return change;
 		}
 
 		public void paint(int[] point) {
@@ -194,8 +195,8 @@ namespace Console_Fourcells {
 			}
 		}
 
-		public void accrual() {
-
+		public bool accrual() {
+			bool change = false;
 			List<int> poss = new List<int>();
 			int[] cro;
 			int num = new int();
@@ -223,6 +224,7 @@ namespace Console_Fourcells {
 					if(poss.Count == 1) {
 						poss.Add(repre);
 						paint(poss.ToArray());
+						change = true;
 					}
 					poss.Clear();
 				}
@@ -273,9 +275,12 @@ namespace Console_Fourcells {
 				if(poss.Count == 1) {
 					poss.Add(repre);
 					paint(poss.ToArray());
+					change = true;
 				}
 				poss.Clear();
 			}
+
+			return change;
 		}
 
 		public bool compOr() {
@@ -319,6 +324,27 @@ namespace Console_Fourcells {
 				}
 				System.Console.WriteLine();
 			}
+		}
+
+		public bool checkRule(int num, int pos) {
+			int[] reg = cross(pos);
+			int baseNum = board[pos / 10, pos % 10];
+			if(baseNum == 0) {
+				return false;
+			}
+			int count = new int();
+			foreach(int re in reg) {
+				try {
+					if(baseNum != board[re / 10, re % 10] && board[re/10, re%10] != 0) {
+						count++;
+					}
+
+				}
+				catch {
+					count++;
+				}
+			}
+			return count == num ? true : false;
 		}
 	}
 }

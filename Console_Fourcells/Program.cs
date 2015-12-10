@@ -15,14 +15,14 @@ namespace Console_Fourcells {
 				System.Console.ReadLine();
 				return;
 			}
-			string[,] iniBoard ={{"-","-","-","1","-","-","-","-"},
-								 {"-","-","-","-","-","-","-","1"},
-								 {"1","-","2","-","-","1","-","-"},
-								 {"-","-","-","2","-","-","-","-"},
-								 {"-","-","-","-","-","-","-","-"},
-								 {"-","2","-","-","-","-","-","1"},
-								 {"1","-","-","-","-","-","-","-"},
-								 {"-","-","-","-","1","-","-","-"},};
+			string[,] iniBoard ={{"3","1","-","-","-","2","-","3"},
+								 {"-","-","-","3","-","-","-","1"},
+								 {"3","-","-","1","-","-","-","-"},
+								 {"-","-","-","-","-","1","3","-"},
+								 {"-","3","1","-","-","-","-","-"},
+								 {"-","-","-","-","2","-","-","3"},
+								 {"1","-","-","-","3","-","-","-"},
+								 {"3","-","2","-","-","-","2","3"}};
 			Board fillBoard = new Board(size);
 
 			List<int> oneList = new List<int>();
@@ -88,8 +88,12 @@ namespace Console_Fourcells {
 			 * 終わる、もしくは駄目だとわかるまでループ
 			 ****************************************/
 			//while(!fillBoard.compOr()) {
-			for(int y = 0; y < 10; y++) {
+			bool change = true;
+			//for(int y = 0; y < 10; y++) {
+			while(change) {
+				change = false;
 				//"1"のマスについてチェック
+
 				if(oneList.Count() != 0) {
 					blocks = set.TBlocks();
 					foreach(int li in oneList) {
@@ -101,6 +105,7 @@ namespace Console_Fourcells {
 						if(checkList.Count == 1) {
 							fillBoard.paint(checkList[0].charRegion(li));
 							blackList.Add(li);
+							change = true;
 						}
 						checkList.Clear();
 					}
@@ -127,10 +132,11 @@ namespace Console_Fourcells {
 					}
 				}
 
-				fillBoard.accrual();
+				change = fillBoard.accrual();
 			}
 
 			fillBoard.debugWrite();
+			System.Console.WriteLine();
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
 					System.Console.Write("{0, 4}", iniBoard[i, j]);
@@ -138,6 +144,15 @@ namespace Console_Fourcells {
 				System.Console.WriteLine();
 			}
 			fillBoard.debugArrayWrite();
+			bool check = false;
+			for(int i = 0; i < size; i++) {
+				for(int j = 0; j < size; j++) {
+					if(iniBoard[i, j] == "1" || iniBoard[i, j] == "2" || iniBoard[i, j] == "3") {
+						check = fillBoard.checkRule(int.Parse(iniBoard[i, j]), i * 10 + j);
+					}
+				}
+			}
+			System.Console.WriteLine("Result : {0,5}", check);
 			//System.Console.WriteLine("oneList : {0}", oneList.Count);
 			//foreach(int li in oneList) {
 			//	System.Console.WriteLine(li);
