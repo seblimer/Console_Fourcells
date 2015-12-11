@@ -52,7 +52,7 @@
     <Compile Include="Block\TBlockU.cs" />
     <Compile Include="Block\TurnLBlockU.cs" />
     <Compile Include="Block\TurnSBlockH.cs" />
-    <Compile Include="Setter.cs" />
+    <Compile Include="SetBlock.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

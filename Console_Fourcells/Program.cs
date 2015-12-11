@@ -5,9 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Console_Fourcells {
-	class Program {
+	class Fourcells {
+		static Dictionary<string, List<int>> numList = new Dictionary<string, List<int>>();
+
+		public static void addNumList(string key, int value) {
+			if(!numList.ContainsKey(key)) {
+				List<int> n_nums = new List<int>();
+				n_nums.Add(value);
+				numList.Add(key, n_nums);
+			}
+			else {
+				numList[key].Add(value);
+			}
+		}
+
 		static void Main(string[] args) {
-			Setter set = new Setter();
+			SetBlock set = new SetBlock();
 			Block[] blocks;
 			int size = 8;
 			if(size % 2 != 0) {
@@ -24,8 +37,6 @@ namespace Console_Fourcells {
 								 {"1","-","-","-","3","-","-","-"},
 								 {"3","-","2","-","-","-","2","3"}};
 			Board fillBoard = new Board(size);
-
-			List<int> oneList = new List<int>();
 			List<int> blackList = new List<int>();
 			List<Block> checkList = new List<Block>();
 			List<int> poss = new List<int>();
@@ -40,42 +51,24 @@ namespace Console_Fourcells {
 			 ****************************************/
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
-					if(iniBoard[i, j] == "1") {
-						oneList.Add(i * 10 + j);
-						if(fillBoard.check(i * 10 + j) == 0) {
-							fillBoard.fill(i * 10 + j);
-						}
-						cross = fillBoard.cross(i * 10 + j);
-						for(int k = 0; k < cross.Length; k++) {
-							oneDig = cross[k] % 10;
-							tenDig = cross[k] / 10;
-							if(0 <= tenDig && tenDig < size) {
-								if(0 <= oneDig && oneDig < size) {
-									if(iniBoard[tenDig, oneDig] == "1") {
-										if(fillBoard.check(cross[k]) == 0) {
-											fillBoard.fill(cross[k]);
-										}
-										fillBoard.registList(fillBoard.check(i * 10 + j), fillBoard.check(cross[k]));
-									}
-								}
+					if(iniBoard[i, j] != "-") {
+						addNumList(iniBoard[i, j], i * 10 + j);
+						if(iniBoard[i, j] != "2") {
+							if(fillBoard.pointNum(i * 10 + j) == 0) {
+								fillBoard.fill(i * 10 + j);
 							}
-						}
-					}
-					if(iniBoard[i, j] == "3") {
-						if(fillBoard.check(i * 10 + j) == 0) {
-							fillBoard.fill(i * 10 + j);
-						}
-						cross = fillBoard.cross(i * 10 + j);
-						for(int k = 0; k < cross.Length; k++) {
-							oneDig = cross[k] % 10;
-							tenDig = cross[k] / 10;
-							if(0 <= tenDig && tenDig < size) {
-								if(0 <= oneDig && oneDig < size) {
-									if(iniBoard[tenDig, oneDig] == "3") {
-										if(fillBoard.check(cross[k]) == 0) {
-											fillBoard.fill(cross[k]);
+							cross = fillBoard.cross(i * 10 + j);
+							for(int k = 0; k < cross.Length; k++) {
+								oneDig = cross[k] % 10;
+								tenDig = cross[k] / 10;
+								if(0 <= tenDig && tenDig < size) {
+									if(0 <= oneDig && oneDig < size) {
+										if(iniBoard[tenDig, oneDig] == iniBoard[i, j]) {
+											if(fillBoard.pointNum(cross[k]) == 0) {
+												fillBoard.fill(cross[k]);
+											}
+											fillBoard.registList(fillBoard.pointNum(i * 10 + j), fillBoard.pointNum(cross[k]));
 										}
-										fillBoard.registList(fillBoard.check(i * 10 + j), fillBoard.check(cross[k]));
 									}
 								}
 							}
@@ -93,10 +86,9 @@ namespace Console_Fourcells {
 			while(change) {
 				change = false;
 				//"1"のマスについてチェック
-
-				if(oneList.Count() != 0) {
+				if(numList["1"].Count != 0) {
 					blocks = set.TBlocks();
-					foreach(int li in oneList) {
+					foreach(int li in numList["1"]) {
 						foreach(Block bl in blocks) {
 							if(fillBoard.isMatch(bl.charRegion(li))) {
 								checkList.Add(bl);
@@ -111,7 +103,7 @@ namespace Console_Fourcells {
 					}
 					try {
 						foreach(int bl in blackList) {
-							oneList.Remove(bl);
+							numList["1"].Remove(bl);
 						}
 					}
 					catch { }
@@ -123,27 +115,26 @@ namespace Console_Fourcells {
 				/****************************************
 				 * 各数字のマスの上下左右をチェック
 				 * 4-数字分周りが確定したブロックならばそれ以外のマスと繋がる
-				 * **************************************/
-				for(int i = 0; i < size; i++) {
-					for(int j = 0; j < size; j++) {
-						if(iniBoard[i, j] == "2" || iniBoard[i, j] == "3") {
-							fillBoard.extend(int.Parse(iniBoard[i, j]), i * 10 + j);
-						}
-					}
-				}
+				 ****************************************/
+				change = fillBoard.roopNumAreaGenerate("2", numList["2"]);
+				change = fillBoard.roopNumAreaGenerate("3", numList["3"]);
 
-				change = fillBoard.accrual();
+				change = fillBoard.generate();
 			}
 
+			/****************************************
+			 * 盤面の表示やデバック関係
+			 ****************************************/
 			fillBoard.debugWrite();
-			System.Console.WriteLine();
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
 					System.Console.Write("{0, 4}", iniBoard[i, j]);
 				}
 				System.Console.WriteLine();
 			}
-			fillBoard.debugArrayWrite();
+			System.Console.WriteLine();
+			//fillBoard.debugArrayWrite();
+			//fillBoard.showDisconnect();
 			bool check = false;
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
@@ -153,14 +144,7 @@ namespace Console_Fourcells {
 				}
 			}
 			System.Console.WriteLine("Result : {0,5}", check);
-			//System.Console.WriteLine("oneList : {0}", oneList.Count);
-			//foreach(int li in oneList) {
-			//	System.Console.WriteLine(li);
-			//}
-			fillBoard.showDisc();
-
-			System.Console.WriteLine();
-			System.Console.Write("Enterで終了 + seqNum = {0}", fillBoard.seqNum());
+			System.Console.Write("Enterで終了");
 			System.Console.ReadLine();
 		}
 	}
