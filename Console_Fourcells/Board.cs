@@ -8,104 +8,93 @@ namespace Console_Fourcells {
 	class Board {
 		private int[,] board;
 		private int size;
-		private int[] seqArray;
 		Dictionary<int, List<int>> disconnect = new Dictionary<int, List<int>>();
+		FinishedPart finished;
+		Sequence sequence;
 
 		public Board(int size) {
-			seqArray = new int[size * size / 4];
-			this.size = size;
+			sequence = new Sequence(size);
+			this.size = size + 2;
 			board = new int[this.size, this.size];
-		}
-
-		public int blockWeight(int num) {
-			if(num < 0) {
-				return 4;
-			}
-			num--;
-			return num >= 0 ? seqArray[num] : 1;
-		}
-
-		public int seqNum() {
-			int len = seqArray.Length;
-			for(int i = 0; i < len; i++) {
-				if(seqArray[i] == 0) {
-					return i + 1;
+			for(int i = 0; i < this.size; i++) {
+				for(int j = 0; j < this.size; j++) {
+					if(i == 0 || i == this.size - 1) {
+						board[i, j] = -1;
+					}
+					else if(j == 0 || j == this.size - 1) {
+						board[i, j] = -1;
+					}
 				}
 			}
-			return 0;
+			finished = new FinishedPart(board);
 		}
 
-		public void registList(int key, int value) {
+		public void entryRegistByPoints(int[] points) {
+			if(points.Length == 2) {
+				foreach(int po in points) {
+					if(board[po / 10, po % 10] == 0) {
+						paint(new int[] { po });
+					}
+				}
+				registList(board[points[0] / 10, points[0] % 10], board[points[1] / 10, points[1] % 10]);
+				registList(board[points[1] / 10, points[1] % 10], board[points[0] / 10, points[0] % 10]);
+			}
+		}
+		private void registList(int key, int value) {
 			if(!disconnect.ContainsKey(key)) {
 				List<int> tmp = new List<int>();
 				tmp.Add(value);
 				disconnect.Add(key, tmp);
 			}
 			else {
-				disconnect[key].Add(value);
+				if(!disconnect[key].Contains(value)) {
+					disconnect[key].Add(value);
+				}
 			}
 		}
 
-		public int pointNum(int point) {
-			return board[point / 10, point % 10];
-		}
+		public bool isMatch(int[] region) {
+			int totalWeight = new int();
+			int num = new int();
+			List<int> strange = new List<int>();
+			foreach(int re in region) {
+				num = board[re / 10, re % 10];
+				if(strange.Contains(num)) {
+					if(num == 0) {
+						totalWeight++;
+					}
+				}
+				else {
+					totalWeight += sequence.blockWeight(num);
+					strange.Add(num);
+				}
 
-		public void fill(int point) {
-			board[point / 10, point % 10] = seqNum();
-			seqArray[seqNum() - 1]++;
+			}
+			if(totalWeight == 4) {
+				return discoCheck(region) && finished.isolationCheck(region) && Fourcells.checkNumRule(region);
+			}
+			return false;
 		}
-
-		public bool discoCheck(int[] point) {
+		private bool discoCheck(int[] region) {
 			List<int> nums = new List<int>();
-			foreach(int po in point) {
-				if(!nums.Contains(board[po / 10, po % 10])) {
-					nums.Add(board[po / 10, po % 10]);
+			foreach(int re in region) {
+				if(!nums.Contains(board[re / 10, re % 10])) {
+					nums.Add(board[re / 10, re % 10]);
 				}
 			}
 			if(nums.Count == 1) {
 				return true;
 			}
-			foreach(int fnu in nums) {
-				if(disconnect.ContainsKey(fnu)) {
-					foreach(int snu in nums) {
-						if(disconnect[fnu].Contains(snu)) {
+			foreach(int nu in nums) {
+				if(disconnect.ContainsKey(nu)) {
+					foreach(int dc in nums) {
+						if(disconnect[nu].Contains(dc)) {
 							return false;
 						}
 					}
 				}
 			}
 			return true;
-		}
-
-		public bool isMatch(int[] point) {
-			int totalWeight = new int();
-			int num = new int();
-			int oneDig = new int();
-			int tenDig = new int();
-			List<int> strange = new List<int>();
-			for(int i = 0; i < point.Length; i++) {
-				tenDig = point[i] / 10;
-				oneDig = point[i] % 10;
-				if(0 <= tenDig && tenDig < size) {
-					if(0 <= oneDig && oneDig < size) {
-						num = board[tenDig, oneDig];
-						if(strange.Contains(num)) {
-							if(num == 0) {
-								totalWeight++;
-							}
-						}
-						else {
-							totalWeight += blockWeight(num);
-							strange.Add(num);
-						}
-					}
-				}
-			}
-
-			if(totalWeight == 4) {
-				return discoCheck(point);
-			}
-			return false;
 		}
 
 		public bool roopNumAreaGenerate(string num, List<int> points) {
@@ -115,41 +104,32 @@ namespace Console_Fourcells {
 			}
 			return isChange;
 		}
-
-		public bool numAreaGenerate(int num, int basePoint) {
+		private bool numAreaGenerate(int num, int basePoint) {
 			int[] region = cross(basePoint);
 			num = region.Length - num;
 			List<int> possibility = new List<int>();
 			int same = new int();
 			int baseNum = board[basePoint / 10, basePoint % 10];
-			int baseWeight = blockWeight(baseNum);
-			int oneDig = new int();
-			int tenDig = new int();
-			for(int i = 0; i < region.Length; i++) {
-				tenDig = region[i] / 10;
-				oneDig = region[i] % 10;
-				if(0 <= tenDig && tenDig < size) {
-					if(0 <= oneDig && oneDig < size) {
-						if(board[tenDig, oneDig] == baseNum) {
-							if(baseNum == 0) {
-								possibility.Add(region[i]);
-							}
-							else {
-								same++;
-							}
-						}
-						else {
-							if(baseWeight + blockWeight(board[tenDig,oneDig]) <= 4) {
-								possibility.Add(region[i]);
-							}
-						}
+			int baseWeight = sequence.blockWeight(baseNum);
+			foreach(int re in region) {
+				if(board[re / 10, re % 10] == baseNum) {
+					if(baseNum == 0) {
+						possibility.Add(re);
+					}
+					else {
+						same++;
+					}
+				}
+				else {
+					if(baseWeight + sequence.blockWeight(board[re / 10, re % 10]) <= 4) {
+						possibility.Add(re);
 					}
 				}
 			}
 			if(same == num) {
-				return false; //あやしい。くっつけないリストへ移動させるようにさせる
+				Fourcells.finishedList((region.Length - num).ToString(), basePoint);
 			}
-			else if(possibility.Count == num - same) {
+			else if(possibility.Count <= num - same) {
 				possibility.Add(basePoint);
 				paint(possibility.ToArray());
 				return true;
@@ -158,116 +138,121 @@ namespace Console_Fourcells {
 		}
 
 		public void paint(int[] point) {
-			int diffNumMin = seqArray.Length + 1;
-			int diffNum = new int();
-			List<int> tmp = new List<int>();
+			int min = sequence.seqNum();
+			int num = new int();
+			List<int> diffNum = new List<int>();
 			for(int i = 0; i < point.Length; i++) {
-				diffNum = board[point[i] / 10, point[i] % 10];
-				if(!tmp.Contains(diffNum)) {
-					tmp.Add(diffNum);
+				num = board[point[i] / 10, point[i] % 10];
+				if(!diffNum.Contains(num)) {
+					diffNum.Add(num);
 				}
-				if(diffNum != 0) {
-					diffNumMin = Math.Min(diffNum, diffNumMin);
+				if(num != 0) {
+					min = Math.Min(num, min);
 				}
 			}
-			if(diffNumMin == seqArray.Length + 1) {
-				diffNumMin = seqNum();
-			}
-			if(diffNumMin != 0) {
-				foreach(int po in point) {
-					int change = board[po / 10, po % 10];
-					if(change != diffNumMin) {
-						if(change == 0) {
-							board[po / 10, po % 10] = diffNumMin;
-							seqArray[diffNumMin - 1]++;
-						}
-						else {
-							for(int i = 0; i < size; i++) {
-								for(int j = 0; j < size; j++) {
-									if(board[i, j] == change) {
-										board[i, j] = diffNumMin;
-										seqArray[diffNumMin - 1]++;
-									}
+			foreach(int po in point) {
+				int change = board[po / 10, po % 10];
+				if(change != min) {
+					if(change == 0) {
+						board[po / 10, po % 10] = min;
+						sequence.add(min);
+					}
+					else {
+						for(int i = 0; i < size; i++) {
+							for(int j = 0; j < size; j++) {
+								if(board[i, j] == change) {
+									board[i, j] = min;
+									sequence.add(min);
 								}
 							}
-							seqArray[change - 1] = 0;
 						}
+						sequence.clear(change);
 					}
-				}
-				foreach(int tm in tmp) {
-					if(disconnect.ContainsKey(tm)) {
-						if(diffNumMin != tm) {
-							foreach(int vl in disconnect[tm]) {
-								disconnect[vl].Remove(tm);
-								disconnect[vl].Add(diffNumMin);
-								registList(diffNumMin, vl);
+					if(disconnect.ContainsKey(change)) {
+						if(min != change) {
+							foreach(int vl in disconnect[change]) {
+								disconnect[vl].Remove(change);
+								disconnect[vl].Add(min);
+								registList(min, vl);
 							}
-							disconnect.Remove(tm);
+							disconnect.Remove(change);
+						}
+
+					}
+				}
+			}
+			sequence.entryAchive(this);
+		}
+		public void achivedAdd(List<int> achived) {
+			List<int> region = new List<int>();
+			foreach(int ac in achived) {
+				for(int i = 1; i < size - 1; i++) {
+					for(int j = 1; j < size - 1; j++) {
+						if(board[i, j] == ac) {
+							region.Add(i * 10 + j);
+							if(region.Count == 4) {
+								i = j = size;
+							}
 						}
 					}
 				}
+				finished.add(region.ToArray());
+				region.Clear();
 			}
 		}
 
 		public bool generate() {
-			bool change = false;
+			int count = new int();
+			while(generateZero() || generateNotZero()) {
+				count++;
+			}
+			return count > 0 ? true : false;
+		}
+		private bool generateZero() {
+			bool isChange = false;
 			List<int> possibility = new List<int>();
 			int[] region;
-			int num = new int();
-			int weight = new int();
-			int repre = new int();
-			int tenDig = new int();
-			int oneDig = new int();
 			for(int i = 0; i < size; i++) {
 				for(int j = 0; j < size; j++) {
 					if(board[i, j] == 0) {
-						repre = i * 10 + j;
 						region = cross(i * 10 + j);
-						for(int k = 0; k < region.Length; k++) {
-							tenDig = region[k] / 10;
-							oneDig = region[k] % 10;
-							if(0 <= tenDig && tenDig < size) {
-								if(0 <= oneDig && oneDig < size) {
-									if(blockWeight(board[tenDig, oneDig]) <= 3) {
-										possibility.Add(region[k]);
-									}
-								}
+						foreach(int re in region) {
+							if(sequence.blockWeight(board[re / 10, re % 10]) <= 3) {
+								possibility.Add(re);
 							}
 						}
 					}
 					if(possibility.Count == 1) {
-						possibility.Add(repre);
+						possibility.Add(i * 10 + j);
 						paint(possibility.ToArray());
-						change = true;
+						isChange = true;
 					}
 					possibility.Clear();
 				}
 			}
-
-			List<int> blackList = new List<int>();
-			List<int> checkList = new List<int>();
-			for(int i = 0; i < seqArray.Length; i++) {
-				if(0 < seqArray[i] && seqArray[i] < 4) {
-					checkList.Add(i + 1);
-				}
-			}
-			foreach(int ch in checkList) {
-				weight = blockWeight(ch);
-				for(int i = 0; i < size; i++) {
-					for(int j = 0; j < size; j++) {
-						if(board[i, j] == ch) {
+			return isChange;
+		}
+		private bool generateNotZero() {
+			bool isChange = false;
+			int weight, num, repre = new int();
+			List<int> possibility = new List<int>();
+			foreach(int li in sequence.notZero()) {
+				weight = sequence.blockWeight(li);
+				for(int i = 1; i < size - 1; i++) {
+					for(int j = 1; j < size - 1; j++) {
+						if(board[i, j] == li) {
 							repre = i * 10 + j;
-							region = cross(i * 10 + j);
-							for(int k = 0; k < region.Length; k++) {
-								tenDig = region[k] / 10;
-								oneDig = region[k] % 10;
-								if(0 <= tenDig && tenDig < size) {
-									if(0 <= oneDig && oneDig < size) {
-										num = board[tenDig, oneDig];
-										if(ch != num && weight + blockWeight(num) <= 4) {
-											if(!possibility.Contains(region[k])) {
-												possibility.Add(region[k]);
+							foreach(int re in cross(i * 10 + j)) {
+								num = board[re / 10, re % 10];
+								if(li != num && weight + sequence.blockWeight(num) <= 4) {
+									if(!possibility.Contains(re)) {
+										if(disconnect.ContainsKey(li)) {
+											if(!disconnect[li].Contains(num)) {
+												possibility.Add(re);
 											}
+										}
+										else {
+											possibility.Add(re);
 										}
 									}
 								}
@@ -275,56 +260,36 @@ namespace Console_Fourcells {
 						}
 					}
 				}
-				if(disconnect.ContainsKey(ch)) {
-					foreach(int po in possibility) {
-						if(disconnect[ch].Contains(board[po / 10, po % 10])) {
-							blackList.Add(po);
-						}
-					}
-					foreach(int bl in blackList) {
-						possibility.Remove(bl);
-					}
-					blackList.Clear();
-				}
 				if(possibility.Count == 1) {
 					possibility.Add(repre);
 					paint(possibility.ToArray());
-					change = true;
+					isChange = true;
 				}
 				possibility.Clear();
 			}
-
-			return change;
+			return isChange;
 		}
 
-		public bool complete() {
-			int size = seqArray.Length;
-			for(int i = 0; i < size; i++) {
-				if(seqArray[i] != 4) {
-					return false;
-				}
-			}
-			return true;
+		
+		//public bool complete() {
+		//	sequenceに対して終了したかどうかを問う
+		//}
+
+		public int[] cross(int basePoint) {
+			return new int[] { basePoint - 10, basePoint - 1, basePoint + 1, basePoint + 10 };
 		}
 
+		/****************************************
+		 * デバッグ関係
+		 ***************************************/
 		public void debugArrayWrite() {
-			int size = seqArray.Length;
-			for(int i = 0; i < size; i = i + 3) {
-				try {
-					System.Console.Write("{0,2} : {1}  ", i + 1, seqArray[i]);
-					System.Console.Write("{0,2} : {1}  ", i + 2, seqArray[i + 1]);
-					System.Console.WriteLine("{0,2} : {1}", i + 3, seqArray[i + 2]);
-				}
-				catch {
-					System.Console.WriteLine();
-				}
-			}
+			sequence.write();
 		}
 
 		public void debugWrite() {
-			for(int i = 0; i < size; i++) {
-				for(int j = 0; j < size; j++) {
-					System.Console.Write("{0,4}", board[i, j]);
+			for(int i = 1; i < size - 1; i++) {
+				for(int j = 1; j < size - 1; j++) {
+					System.Console.Write("{0,3}", board[i, j]);
 				}
 				System.Console.WriteLine();
 			}
@@ -336,7 +301,7 @@ namespace Console_Fourcells {
 			foreach(int i in disconnect.Keys) {
 				System.Console.Write("{0,2} : ", i);
 				foreach(int j in disconnect[i]) {
-					System.Console.Write(" {0,2}", j);
+					System.Console.Write("{0,2}", j);
 				}
 				System.Console.WriteLine();
 			}
@@ -361,14 +326,6 @@ namespace Console_Fourcells {
 				}
 			}
 			return count == num ? true : false;
-		}
-
-		public int[] cross(int basePoint) {
-			return new int[] { basePoint - 10, basePoint - 1, basePoint + 1, basePoint + 10 };
-		}
-
-		public int[] saltire(int basePoint) {
-			return new int[] { basePoint - 11, basePoint - 9, basePoint + 9, basePoint + 11 };
 		}
 	}
 }
