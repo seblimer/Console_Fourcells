@@ -13,8 +13,9 @@ namespace Console_Fourcells {
 			sequence = new int[size * size];
 		}
 
-		public int Length {
-			get { return sequence.Length; }
+		public int[] sequenceProperty {
+			get { return (int[])sequence.Clone(); }
+			set { sequence = value; }
 		}
 
 		public int seqNum() {
@@ -34,16 +35,6 @@ namespace Console_Fourcells {
 			return --num >= 0 ? sequence[num] : 1;
 		}
 
-		public List<int> notZero() {
-			List<int> list = new List<int>();
-			for(int i = 0; i < sequence.Length; i++) {
-				if(0 < sequence[i] && sequence[i] < 4) {
-					list.Add(i + 1);
-				}
-			}
-			return list;
-		}
-
 		public void add(int num) {
 			add(num, 1);
 		}
@@ -56,12 +47,6 @@ namespace Console_Fourcells {
 			}
 		}
 
-		public void sub(int num) {
-			sub(num, 1);
-		}
-		public void sub(int num, int value) {
-			sequence[num - 1] -= value;
-		}
 		public void clear(int num) {
 			sequence[num - 1] = 0;
 		}
@@ -72,20 +57,14 @@ namespace Console_Fourcells {
 			complete.Sort();
 			achieved.Clear();
 		}
-	
-		//デバッグ関係
-		public void write() {
-			int size = sequence.Length;
-			for(int i = 0; i < size; i = i + 3) {
-				try {
-					System.Console.Write("{0,2} : {1}  ", i + 1, sequence[i]);
-					System.Console.Write("{0,2} : {1}  ", i + 2, sequence[i + 1]);
-					System.Console.WriteLine("{0,2} : {1}", i + 3, sequence[i + 2]);
-				}
-				catch {
-					System.Console.WriteLine();
+
+		public bool isBlockComplete() {
+			foreach(int se in sequence) {
+				if(se % 4 != 0){
+					return false;
 				}
 			}
+			return true;
 		}
 	}
 }

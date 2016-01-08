@@ -5,64 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Console_Fourcells {
-	class TBlockU : Block{
-		public TBlockU() {
-			num = 6;
-		}
-		
+	class TBlockU : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 9, basePoint + 10, basePoint + 11 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			int[] point = { basePoint - 10, basePoint - 1, basePoint, basePoint + 1 };
-			return point;
+			return new int[] { basePoint, basePoint + convert - 1, basePoint + convert, basePoint + convert + 1 };
 		}
 	}
-	class TBlockR : Block { 
-		public TBlockR() {
-			num = 16;
-		}
-		
+	class TBlockR : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 10, basePoint + 11, basePoint + 20 };
-			return point;
-		}
+			return new int[] { basePoint, basePoint + convert, basePoint + convert + 1, basePoint + 2 * convert };
 
-		public override int[] charRegion(int basePoint) {
-			int[] point = { basePoint - 10, basePoint, basePoint + 1, basePoint + 10 };
-			return point;
 		}
 	}
-	class TBlockD : Block { 
-		public TBlockD() {
-			num = 17;
-		}
-		
+	class TBlockD : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 1, basePoint + 2, basePoint + 11 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			int[] point = { basePoint - 1, basePoint, basePoint + 1, basePoint + 10 };
-			return point;
+			return new int[] { basePoint, basePoint + 1, basePoint + 2, basePoint + convert + 1 };
 		}
 	}
-	class TBlockL : Block { 
-		public TBlockL() {
-			num = 18;
-		}
-		
+	class TBlockL : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 9, basePoint + 10, basePoint + 20 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			int[] point = { basePoint - 10, basePoint - 1, basePoint, basePoint + 10 };
-			return point;
+			return new int[] { basePoint, basePoint + convert - 1, basePoint + convert, basePoint + 2 * convert };
 		}
 	}
 }

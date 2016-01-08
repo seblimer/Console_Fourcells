@@ -5,30 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Console_Fourcells {
-	class SBlockH : Block{
-		public SBlockH() {
-			num = 3;
-		}
+	class SBlockH : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 1, basePoint + 9, basePoint + 10 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+			return new int[] { basePoint, basePoint + 1, basePoint + convert - 1, basePoint + convert };
 		}
 	}
 	class SBlockV : Block {
-		public SBlockV() {
-			num = 14;
-		}
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 10, basePoint + 11, basePoint + 21 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+			return new int[] { basePoint, basePoint + convert, basePoint + convert + 1, basePoint + 2 * convert + 1 };
 		}
 	}
 }

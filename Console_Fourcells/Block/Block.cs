@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace Console_Fourcells {
 	abstract class Block {
-		protected int num;
-
-		public int Num {
-			get{return num;}
+		protected static int convert;
+		public static int Convert {
+			set { convert = value; }
 		}
 
 		public abstract int[] region(int basePoint);
-
-		public abstract int[] charRegion(int basePoint);
 	}
 }

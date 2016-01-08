@@ -5,59 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Console_Fourcells {
-	class LBlockU : Block{
-		public LBlockU() {
-			num = 1;
-		}
-		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 10, basePoint + 20, basePoint + 21 };
-			return point;
-		}
+	class LBlockU : Block {
 
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+		public override int[] region(int basePoint) {
+			return new int[] { basePoint, basePoint + convert, basePoint + 2 * convert, basePoint + 2 * convert + 1 };
 		}
 	}
 
-	class LBlockR : Block { 
-		public LBlockR() {
-			num = 8;
-		}
+	class LBlockR : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 1, basePoint + 2, basePoint + 10 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+			return new int[] { basePoint, basePoint + 1, basePoint + 2, basePoint + convert };
 		}
 	}
 
 	class LBlockD : Block {
-		public LBlockD() {
-			num = 9;
-		}
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 1, basePoint + 11, basePoint + 21 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+			return new int[] { basePoint, basePoint + 1, basePoint + convert + 1, basePoint + 2 * convert + 1 };
 		}
 	}
 
-	class LBlockL : Block { 
-		public LBlockL() {
-			num = 10;
-		}
+	class LBlockL : Block {
 		public override int[] region(int basePoint) {
-			int[] point = { basePoint, basePoint + 10, basePoint + 9, basePoint + 8 };
-			return point;
-		}
-
-		public override int[] charRegion(int basePoint) {
-			return new int[0];
+			return new int[] { basePoint, basePoint + convert, basePoint + convert - 1, basePoint + convert - 2 };
 		}
 	}
 }
